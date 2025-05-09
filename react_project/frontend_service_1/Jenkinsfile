@@ -26,9 +26,8 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 dir('react_project/frontend_service_1') {
+                    bat 'npm install -g npm-check-updates'
                     bat 'npm install'
-                    bat 'npx update-browserslist-db@latest'
-                    bat 'npm audit fix --force'
                 }
             }
         }
