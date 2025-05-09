@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node' // This must be configured in Jenkins > Global Tool Configuration
+        nodejs 'node' // Must match what's configured in Jenkins > Global Tool Configuration
     }
 
     environment {
@@ -19,44 +19,31 @@ pipeline {
     }
 
     stages {
-        stage('Git Clone') {
+        stage('Checkout') {
             steps {
-                git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Backend-Services.git'
+                git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Practice--Projects.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
+                    bat 'npm install'
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
+                    script {
+                        docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                            def app = docker.build("${IMAGE_NAME}")
+                            app.push("latest")
+                        }
                     }
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment succeeded!'
-        }
-        failure {
-            echo 'Deployment failed.'
         }
     }
 }
