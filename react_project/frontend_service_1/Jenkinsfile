@@ -6,7 +6,7 @@ pipeline {
     }
     
     environment {
-        DOCKER_IMAGE = "bhoomika2897n/frontend-service":$BUILD_NUMBER
+        DOCKER_IMAGE = "bhoomika2897n/frontend-service:$BUILD_NUMBER"
         DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
     stages {
