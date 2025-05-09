@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'bhoomika2897n/frontend-service:$BUILD_NUMBER'
-        DOCKER_CREDENTIALS_ID = 'Docker_cred'
+        DOCKER_IMAGE = "bhoomika2897n/frontend-service:$BUILD_NUMBER"
+        DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
     tools {
@@ -55,7 +55,7 @@ pipeline {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
                         dockerImage.push()
-                        dockerImage.push('latest')
+                        dockerImage.push("latest")
                     }
                 }
             }
