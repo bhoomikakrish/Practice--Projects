@@ -41,8 +41,7 @@ pipeline {
         }
 
         stage('Build and Push Docker Image') {
-            steps {
-                dir('react_project/frontend_service_1') {
+            steps { 
                     script {
                        docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
                             def app = docker.build("${IMAGE_NAME}")
@@ -52,7 +51,6 @@ pipeline {
                     }
                 }
             }
-        }
         stage('Deploy') {
             steps {
                 echo "Deploying ${DOCKER_IMAGE}"
