@@ -43,7 +43,7 @@ pipeline {
             steps {
                 dir('react_project/frontend_service_1') {
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}")
+                   def dockerImage = docker.build("${DOCKER_IMAGE}")
                 }
             }
         }
