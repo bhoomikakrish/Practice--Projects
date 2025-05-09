@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "bhoomika2897n/frontend-react-app"
+        IMAGE_NAME = "bhoomika2897n/frontendimage:$BUILD_NUMBER"
         DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
@@ -42,14 +42,17 @@ pipeline {
 
         stage('Build and Push Docker Image') {
             steps {
+                dir('react_project/frontend_service_1') {
                     script {
-                        docker.withRegistry('https://registry.hub.docker.com', "${DOCKER_CREDENTIALS_ID}") {
-                            docker.build("${DOCKER_IMAGE}").push()
+                       docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                            def app = docker.build("${IMAGE_NAME}")
+                            app.push()
+                            app.push("latest")
                         }
                     }
+                }
             }
         }
-
         stage('Deploy') {
             steps {
                 echo "Deploying ${DOCKER_IMAGE}"
@@ -58,6 +61,7 @@ pipeline {
             }
         }
     }
+}
 
     post {
         success {
@@ -67,4 +71,3 @@ pipeline {
             echo 'Deployment failed!'
         }
     }
-}
