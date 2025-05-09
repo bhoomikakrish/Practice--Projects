@@ -1,15 +1,14 @@
 pipeline {
     agent any
 
+        tools {
+        nodejs 'node'
+    }
+    
     environment {
         DOCKER_IMAGE = "bhoomika2897n/frontend-service":$BUILD_NUMBER
         DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
-
-    tools {
-        nodejs 'node'
-    }
-
     stages {
         stage('Print Node Version') {
             steps {
