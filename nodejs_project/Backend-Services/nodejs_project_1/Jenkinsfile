@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "bhoomika2897n/nodejsservice-2"
-        DOCKER_CREDENTIALS_ID = "docker-cred"
+        DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
     parameters {
