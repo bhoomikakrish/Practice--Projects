@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'bhoomika2897n/frontend-service'
+        DOCKER_IMAGE = 'bhoomika2897n/frontend-service:$BUILD_NUMBER'
         DOCKER_CREDENTIALS_ID = 'Docker_cred'
     }
 
@@ -25,26 +25,33 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
+                dir('react_project/frontend_service_1') {
                 bat 'npm install'
             }
         }
+    }     
 
         stage('Build React App') {
             steps {
+                dir('react_project/frontend_service_1') {
                 bat 'npm run build'
             }
         }
+     }
 
         stage('Build Docker Image') {
             steps {
+                dir('react_project/frontend_service_1') {
                 script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                    dockerImage = docker.build("${DOCKER_IMAGE}")
                 }
             }
         }
+    }
 
         stage('Push Docker Image') {
             steps {
+                dir('react_project/frontend_service_1') {
                 script {
                     docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
                         dockerImage.push()
@@ -53,6 +60,7 @@ pipeline {
                 }
             }
         }
+    }
 
         stage('Deploy') {
             steps {
