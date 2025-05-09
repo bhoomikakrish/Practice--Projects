@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "bhoomika2897n/frontend-service"
+        DOCKER_IMAGE = "bhoomika2897n/frontend-service":$BUILD_NUMBER
         DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
     tools {
-        nodejs 'node' // Defined in Jenkins > Global Tool Configuration
+        nodejs 'node'
     }
 
     stages {
@@ -33,27 +33,20 @@ pipeline {
 
         stage('Build React App') {
             steps {
-                    bat 'npm run build'
-                }
-            }
-
-        stage('Build Docker Image') {
-            steps {
                 dir('react_project/frontend_service_1') {
-                    script {
-                        dockerImage = docker.build("${DOCKER_IMAGE}":"${BUILD_NUMBER}")
-                    }
+                    bat 'npm run build'
                 }
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
-                dir('react_project/frontend_service_1') {
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
                     script {
-                        docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
-                            dockerImage.push()
-                            dockerImage.push("latest")
+                        docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                            def app = docker.build("${IMAGE_NAME}")
+                            app.push()
+                            app.push("latest")
                         }
                     }
                 }
@@ -63,7 +56,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo "Deploying ${DOCKER_IMAGE}"
-                // Add your deploy logic here (e.g., kubectl apply or docker run)
+                // kubectl apply -f deployment.yaml or similar
             }
         }
     }
