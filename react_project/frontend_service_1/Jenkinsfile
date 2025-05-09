@@ -40,7 +40,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir('nodejs_project/Backend-Services/nodejs_project_1') {
+                dir('react_project/frontend_service_1') {
                     script {
                         docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
                             def app = docker.build("${IMAGE_NAME}")
