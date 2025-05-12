@@ -2,61 +2,72 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node' // This must be configured in Jenkins > Global Tool Configuration
+        nodejs 'node'
     }
 
     environment {
-        IMAGE_NAME = "bhoomika2897n/nodejsservice-2"
-        DOCKER_CREDENTIALS_ID = "docker-cred"
-    }
-
-    parameters {
-        choice(
-            name: 'Branch_Name',
-            choices: ['main', 'master'],
-            description: 'Please select branch name'
-        )
+        IMAGE_NAME = "bhoomika2897n/frontendimage:$BUILD_NUMBER"
+        DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
     stages {
-        stage('Git Clone') {
+        stage('Print Node Version') {
             steps {
-                git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Backend-Services.git'
+                bat 'node -v'
+            }
+        }
+
+        stage('Clone Git Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/bhoomikakrish/Frontend_Service.git'
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                dir('react_project/frontend_service_1') {
+                    bat 'npm install -g npm-check-updates'
+                    bat 'npm install'
                 }
             }
         }
 
-        stage('Docker Push') {
+        stage('Build React App') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
+                dir('react_project/frontend_service_1') {
+                    bat 'npm run build'
+                }
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                dir('react_project/frontend_service_1') {
+                    script {
+                       docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                            def app = docker.build("${IMAGE_NAME}")
+                            app.push()
+                            app.push("latest")
+                        }
                     }
                 }
             }
         }
+        stage('Deploy') {
+            steps {
+                echo "Deploying ${DOCKER_IMAGE}"
+                // Uncomment and configure the below line if you want to deploy using Kubernetes
+                // bat 'kubectl apply -f k8s/deployment.yaml'
+            }
+        }
     }
+}
 
     post {
         success {
             echo 'Deployment succeeded!'
         }
         failure {
-            echo 'Deployment failed.'
+            echo 'Deployment failed!'
         }
     }
-}
