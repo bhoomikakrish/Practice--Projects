@@ -2,25 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node'
-    }
-
-    environment {
-        IMAGE_NAME = "bhoomika2897n/frontendimage:$BUILD_NUMBER"
-        DOCKER_CREDENTIALS_ID = "Docker_cred"
-    }
-
-    stages {
-        stage('Print Node Version') {
-            steps {
-                bat 'node -v'
-            }
-        }
-
-        stage('Clone Git Repo') {
-            steps {
-                git branch: 'main', url: 'https://github.com/bhoomikakrish/Frontend_Service.git'
-        nodejs 'node' // Must match what's configured in Jenkins > Global Tool Configuration
+        nodejs 'node'  // This must match the name configured in Jenkins > Global Tool Configuration
     }
 
     environment {
@@ -37,6 +19,12 @@ pipeline {
     }
 
     stages {
+        stage('Print Node Version') {
+            steps {
+                bat 'node -v'
+            }
+        }
+
         stage('Checkout') {
             steps {
                 git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Practice--Projects.git'
@@ -47,6 +35,7 @@ pipeline {
             steps {
                 dir('react_project/frontend_service_1') {
                     bat 'npm install -g npm-check-updates'
+                }
                 dir('nodejs_project/Backend-Services/nodejs_project_1') {
                     bat 'npm install'
                 }
@@ -61,33 +50,26 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker Image') {
-            steps {
-                dir('react_project/frontend_service_1') {
-                    script {
-                       docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
-        stage('Build Docker Image') {
+        stage('Build & Push Docker Image') {
             steps {
                 dir('nodejs_project/Backend-Services/nodejs_project_1') {
                     script {
                         docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
                             def app = docker.build("${IMAGE_NAME}")
                             app.push()
-                            app.push("latest")
+                            app.push('latest')
                         }
                     }
                 }
             }
         }
-        stage('Deploy') {
+
+        stage('Deploy to Kubernetes') {
             steps {
-                echo "Deploying ${DOCKER_IMAGE}"
-                // Uncomment and configure the below line if you want to deploy using Kubernetes
-                // bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f Kubernetes/Deployment.yaml'
             }
         }
     }
-}
 
     post {
         success {
@@ -95,12 +77,6 @@ pipeline {
         }
         failure {
             echo 'Deployment failed!'
-        stage("Deploy to Kubernetes") {
-            steps {
-                 script {
-                    bat 'kubectl apply -f Kubernetes/Deployment.yaml'
-                }
-            }
         }
     }
-    }
+}
