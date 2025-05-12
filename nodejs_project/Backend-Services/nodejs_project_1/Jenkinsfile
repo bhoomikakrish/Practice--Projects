@@ -49,7 +49,7 @@ pipeline {
         stage("Deploy to Kubernetes") {
             steps {
                  script {
-                    sh 'kubectl apply -f Kubernetes/Deployment.yaml'
+                    bat 'kubectl apply -f Kubernetes/Deployment.yaml'
                 }
             }
         }
