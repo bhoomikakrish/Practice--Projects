@@ -33,19 +33,11 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                dir('react_project/frontend_service_1') {
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
                     bat 'npm install -g npm-check-updates'
                 }
                 dir('nodejs_project/Backend-Services/nodejs_project_1') {
-                    bat 'npm install'
-                }
-            }
-        }
-
-        stage('Build React App') {
-            steps {
-                dir('react_project/frontend_service_1') {
-                    bat 'npm run build'
+                    bat 'npm run install'
                 }
             }
         }
