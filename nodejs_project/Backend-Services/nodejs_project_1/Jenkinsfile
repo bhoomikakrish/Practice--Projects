@@ -58,7 +58,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f nodejs_project/Backend-Services/nodejs_project_1/Kubernetes/Deployment.yaml'
+                bat 'kubectl apply -f nodejs_project/Backend-Services/nodejs_project_1/Kubernetes/Deployment.yaml --validate=false'
             }
         }
     }
