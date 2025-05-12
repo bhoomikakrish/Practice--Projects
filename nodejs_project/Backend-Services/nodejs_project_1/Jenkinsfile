@@ -37,7 +37,7 @@ pipeline {
                     bat 'npm install -g npm-check-updates'
                 }
                 dir('nodejs_project/Backend-Services/nodejs_project_1') {
-                    bat 'npm run install'
+                    bat 'npm install'
                 }
             }
         }
