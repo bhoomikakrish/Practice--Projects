@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     tools {
+<<<<<<< HEAD
         nodejs 'node'
     }
 
@@ -20,18 +21,45 @@ pipeline {
         stage('Clone Git Repo') {
             steps {
                 git branch: 'main', url: 'https://github.com/bhoomikakrish/Frontend_Service.git'
+=======
+        nodejs 'node' // Must match what's configured in Jenkins > Global Tool Configuration
+    }
+
+    environment {
+        IMAGE_NAME = "bhoomika2897n/nodejsservice-1:$BUILD_NUMBER"
+        DOCKER_CREDENTIALS_ID = "Docker_cred"
+    }
+
+    parameters {
+        choice(
+            name: 'Branch_Name',
+            choices: ['main', 'master'],
+            description: 'Please select branch name'
+        )
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Practice--Projects.git'
+>>>>>>> 143235bf51f9e4d40d27fe6f8b126c64767ea322
             }
         }
 
         stage('Install Dependencies') {
             steps {
+<<<<<<< HEAD
                 dir('react_project/frontend_service_1') {
                     bat 'npm install -g npm-check-updates'
+=======
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
+>>>>>>> 143235bf51f9e4d40d27fe6f8b126c64767ea322
                     bat 'npm install'
                 }
             }
         }
 
+<<<<<<< HEAD
         stage('Build React App') {
             steps {
                 dir('react_project/frontend_service_1') {
@@ -45,6 +73,13 @@ pipeline {
                 dir('react_project/frontend_service_1') {
                     script {
                        docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+=======
+        stage('Build Docker Image') {
+            steps {
+                dir('nodejs_project/Backend-Services/nodejs_project_1') {
+                    script {
+                        docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+>>>>>>> 143235bf51f9e4d40d27fe6f8b126c64767ea322
                             def app = docker.build("${IMAGE_NAME}")
                             app.push()
                             app.push("latest")
@@ -53,6 +88,7 @@ pipeline {
                 }
             }
         }
+<<<<<<< HEAD
         stage('Deploy') {
             steps {
                 echo "Deploying ${DOCKER_IMAGE}"
@@ -69,5 +105,13 @@ pipeline {
         }
         failure {
             echo 'Deployment failed!'
+=======
+        stage("Deploy to Kubernetes") {
+            steps {
+                 script {
+                    bat 'kubectl apply -f Kubernetes/Deployment.yaml'
+                }
+            }
+>>>>>>> 143235bf51f9e4d40d27fe6f8b126c64767ea322
         }
     }

@@ -1,17 +1,17 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKER_IMAGE = 'bhoomika2897n/frontend-service'
-        DOCKER_CREDENTIALS_ID = 'Docker_cred'
+    tools {
+        nodejs 'node'
     }
 
-    tools {
-        nodejs 'node'  // You must define this tool in Jenkins (Manage Jenkins > Global Tool Configuration)
+    environment {
+        IMAGE_NAME = "bhoomika2897n/frontendimage:$BUILD_NUMBER"
+        DOCKER_CREDENTIALS_ID = "Docker_cred"
     }
 
     stages {
-        stage('Node Version') {
+        stage('Print Node Version') {
             steps {
                 bat 'node -v'
             }
@@ -25,49 +25,47 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                bat 'npm install'
+                dir('react_project/frontend_service_1') {
+                    bat 'npm install -g npm-check-updates'
+                    bat 'npm install'
+                }
             }
         }
 
         stage('Build React App') {
             steps {
-                bat 'npm run build'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
+                dir('react_project/frontend_service_1') {
+                    bat 'npm run build'
                 }
             }
         }
 
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
-                        dockerImage.push()
-                        dockerImage.push('latest')
+        stage('Build and Push Docker Image') {
+            steps { 
+                    script {
+                       docker.withRegistry('', "${DOCKER_CREDENTIALS_ID}") {
+                            def app = docker.build("${IMAGE_NAME}")
+                            app.push()
+                            app.push("latest")
+                        }
                     }
                 }
             }
-        }
-
         stage('Deploy') {
             steps {
-                echo "Deploying ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                // Add your kubectl apply or docker run commands here
+                echo "Deploying ${DOCKER_IMAGE}"
+                // Uncomment and configure the below line if you want to deploy using Kubernetes
+                // bat 'kubectl apply -f k8s/deployment.yaml'
             }
         }
     }
+}
 
     post {
         success {
-            echo ' Deployment succeeded!'
+            echo 'Deployment succeeded!'
         }
         failure {
-            echo ' Deployment failed!'
+            echo 'Deployment failed!'
         }
     }
-}

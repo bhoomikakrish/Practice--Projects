@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'node' // This must be configured in Jenkins > Global Tool Configuration
+    }
+
+    environment {
+        IMAGE_NAME = "bhoomika2897n/nodejsservice-2"
+        DOCKER_CREDENTIALS_ID = "docker-cred"
+    }
+
+    parameters {
+        choice(
+            name: 'Branch_Name',
+            choices: ['main', 'master'],
+            description: 'Please select branch name'
+        )
+    }
+
+    stages {
+        stage('Git Clone') {
+            steps {
+                git branch: "${params.Branch_Name}", url: 'https://github.com/bhoomikakrish/Backend-Services.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat 'npm install'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                script {
+                    dockerImage = docker.build("${IMAGE_NAME}:${BUILD_NUMBER}")
+                }
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_CREDENTIALS_ID) {
+                        dockerImage.push()
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment succeeded!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
